@@ -128,7 +128,7 @@ export default function OnboardingPage() {
                       ? 'bg-[#bef264]/20 text-[#bef264]'
                       : 'bg-white/5 text-white/30'
                   }`}>
-                    {isDone ? <CheckCircle2 className="w-3 h-3" /> : <s.icon className="w-3 h-3" />}
+                    {isDone ? <CheckCircle2 className="w-3 h-3" /> : React.createElement(s.icon as any, { className: "w-3 h-3" })}
                     {s.label}
                   </div>
                   {i < STEPS.length - 1 && (
