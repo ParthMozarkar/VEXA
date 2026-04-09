@@ -35,114 +35,144 @@ export default function LandingPage() {
     <div ref={containerRef} className="w-full overflow-hidden">
 
       {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-4 pb-24 pt-16">
-        {/* Ambient glows */}
-        <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-[#bef264]/8 rounded-full blur-[150px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center px-4 pt-32 pb-20 overflow-hidden">
+        {/* Tech Grid Background */}
+        <div className="absolute inset-0 tech-grid opacity-0 pointer-events-none" />
+        
+        {/* Ambient Orbs */}
+        <motion.div 
+          className="absolute top-20 left-10 w-80 h-80 bg-[#00d9ff]/8 rounded-full blur-[120px] pointer-events-none"
+          animate={{ y: [0, -40, 0], x: [0, 20, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-32 right-20 w-96 h-96 bg-[#ff006e]/8 rounded-full blur-[140px] pointer-events-none"
+          animate={{ y: [0, 40, 0], x: [0, -30, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
 
-        {/* Floating badge cards */}
-        <div className="absolute inset-0 pointer-events-none hidden lg:block overflow-hidden">
-          <motion.div
-            animate={{ y: [0, -12, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[22%] left-[8%] glass-panel border border-[#bef264]/20 rounded-2xl p-4 shadow-xl"
-          >
-            <p className="text-white/40 text-xs mb-1">Fit Score</p>
-            <p className="text-[#bef264] font-bold text-2xl">94%</p>
-            <p className="text-white/30 text-xs mt-1">↑ from 68% (size guess)</p>
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [0, -18, 0] }}
-            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-[18%] right-[10%] glass-panel border border-white/10 rounded-2xl p-4 shadow-xl"
-          >
-            <p className="text-white/40 text-xs mb-1">Return Rate</p>
-            <div className="flex items-end gap-1">
-              <p className="text-white font-bold text-2xl">−31%</p>
-              <span className="text-[#bef264] text-xs mb-1">avg</span>
-            </div>
-            <p className="text-white/30 text-xs mt-1">after VEXA integration</p>
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-[18%] left-[14%] glass-panel border border-white/10 rounded-2xl px-4 py-3 shadow-xl"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#bef264] animate-pulse" />
-              <span className="text-white/60 text-xs">SMPL-X pipeline · 2.1s avg</span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Hero content */}
+        {/* Hero Content */}
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
-          className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto"
+          className="relative z-10 flex flex-col items-center text-center max-w-6xl mx-auto"
         >
+          {/* Status Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-[#bef264]/30 mb-8"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-[#6b7280]/30 mb-8"
           >
-            <Sparkles className="w-4 h-4 text-[#bef264]" />
-            <span className="text-[#bef264] text-sm font-medium uppercase tracking-wider">B2B SaaS API Platform</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#6b7280] animate-pulse" />
+            <span className="text-[#9ca3af] text-[11px] font-semibold uppercase tracking-widest">Enterprise API</span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white mb-6 leading-[1.05]"
-          >
-            Every Shopper{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#bef264] via-[#d9f99d] to-[#a3e635] drop-shadow-[0_0_40px_rgba(190,242,100,0.25)]">
-              Gets Their
-            </span>{" "}
-            <br />
-            Own 3D Body Avatar.
-          </motion.h1>
+          {/* Main Headline - Letter by Letter */}
+          <div className="mb-8 leading-tight">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-white">
+              {['P','r','e','c','i','s','i','o','n',' ','F','i','t',','].map((letter, idx) => (
+                <motion.span
+                  key={idx}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.04, duration: 0.5 }}
+                  className="inline-block"
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </h1>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-white mt-2">
+              {['E','v','e','r','y',' ','T','i','m','e','.'].map((letter, idx) => (
+                <motion.span
+                  key={idx}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: (idx + 14) * 0.04, duration: 0.5 }}
+                  className="inline-block"
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </h1>
+          </div>
 
+          {/* Subheading */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-xl md:text-2xl text-white/55 mb-10 max-w-3xl leading-relaxed"
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="text-base md:text-lg text-white/50 mb-12 max-w-3xl leading-relaxed font-light tracking-wide"
           >
-            Fashion marketplaces embed one API key. Their end-users upload one photo.
-            VEXA returns a personalized SMPL-X avatar — clothes rendered on them, not a generic mannequin.
+            Enterprise-grade 3D avatar technology. Reduce returns by <span className="text-[#9ca3af] font-semibold">31%</span>. 
+            Integrate in <span className="text-[#6b7280] font-semibold">minutes</span>.
           </motion.p>
 
+          {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
             className="flex flex-col sm:flex-row items-center gap-4"
           >
             <Link href="/onboarding">
               <motion.button
                 id="hero-cta-primary"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                className="group flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg bg-[#bef264] text-black hover:bg-[#a3e635] shadow-[0_0_50px_rgba(190,242,100,0.4)] transition-all duration-300"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest bg-gradient-to-r from-[#9ca3af] to-[#6b7280] text-black glow-pulse overflow-hidden"
               >
-                <Sparkles className="w-5 h-5" />
-                Build Your Avatar
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <span className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <span className="relative z-10">Start Now</span>
+                <ArrowRight className="relative z-10 w-4 h-4" />
               </motion.button>
             </Link>
             <Link href="/dashboard">
-              <button
+              <motion.button
                 id="hero-cta-secondary"
-                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-lg border border-white/15 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-300"
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.08)", y: -2 }}
+                className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-widest border border-white/15 text-white/70 hover:text-white transition-all duration-300"
               >
-                View Dashboard
-                <ChevronRight className="w-5 h-5" />
-              </button>
+                View Docs
+              </motion.button>
             </Link>
+          </motion.div>
+
+          {/* Metrics Row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: 0.8 }}
+            className="flex flex-wrap justify-center gap-12 mt-20 pt-12 border-t border-white/5"
+          >
+            {[
+              { label: 'Fit Accuracy', value: '94%' },
+              { label: 'Return Rate ↓', value: '31%' },
+              { label: 'API Response', value: '2.1s' },
+            ].map((metric, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.6 + idx * 0.1 }}
+                className="text-center"
+              >
+                <p className="text-white/40 text-xs uppercase tracking-widest mb-2">{metric.label}</p>
+                <p className="text-2xl font-black bg-gradient-to-r from-[#9ca3af] to-[#6b7280] bg-clip-text text-transparent">{metric.value}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Scroll Indicator */}
+          <motion.div
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="mt-20 flex flex-col items-center gap-2"
+          >
+            <span className="text-white/30 text-xs uppercase tracking-widest font-semibold">Scroll</span>
+            <svg className="w-5 h-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
           </motion.div>
         </motion.div>
       </section>
