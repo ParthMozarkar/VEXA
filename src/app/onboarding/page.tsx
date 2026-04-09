@@ -12,7 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaceCapture } from '@/components/FaceCapture';
 import { MeasurementForm } from '@/components/MeasurementForm';
 import { useAvatar } from '@/hooks/useAvatar';
+import { useStore } from '@/store/useStore';
 import type { BodyMeasurements } from '@/types';
+import type { UserWithMeasurements } from '@/hooks/useUser';
 import {
   Camera, Ruler, Sparkles, CheckCircle2, ArrowRight, ArrowLeft,
 } from 'lucide-react';
@@ -36,7 +38,11 @@ export default function OnboardingPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [userId] = useState(DEMO_USER_ID);
+
+  const { setCurrentUser, setUserPhotoUrl } = useStore();
 
   // Start polling only when generating
   const { status: avatarStatus, progress, glbUrl } = useAvatar(
@@ -51,10 +57,46 @@ export default function OnboardingPage() {
     }
   }, [avatarStatus, step]);
 
-  const handlePhotoCapture = useCallback((file: File) => {
+  /** Step 1 – FaceCapture wired to /api/upload */
+  const handlePhotoCapture = useCallback(async (file: File) => {
     setCapturedFile(file);
-  }, []);
+    setPhotoError(null);
+    setPhotoUploading(true);
 
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Get access token from Supabase session (if logged in)
+      const { supabase } = await import('@/lib/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: HeadersInit = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {};
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        // Non-fatal — user can proceed without upload
+        setPhotoError(json.error ?? 'Photo upload failed');
+        return;
+      }
+
+      const json = (await res.json()) as { url: string };
+      setUserPhotoUrl(json.url);
+    } catch {
+      setPhotoError('Photo upload failed. You can still continue.');
+    } finally {
+      setPhotoUploading(false);
+    }
+  }, [setUserPhotoUrl]);
+
+  /** Step 2 – MeasurementForm wired to /api/auth/signup then avatar generation */
   const handleMeasurementsSubmit = useCallback(async (m: BodyMeasurements) => {
     if (!capturedFile) return;
     setMeasurements(m);
@@ -62,7 +104,43 @@ export default function OnboardingPage() {
     setSubmitError(null);
 
     try {
-      // Convert photo to base64
+      // ── 1. Signup via /api/auth/signup ──────────────────────────────────
+      const signupRes = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `user_${Date.now()}@vexa.app`, // placeholder; replace with real email input
+          password: Math.random().toString(36).slice(2) + 'Aa1!', // placeholder strong password
+          height: m.heightCm,
+          chest: m.chestCm,
+          waist: m.waistCm,
+          hips: m.hipsCm,
+          inseam: m.inseamCm,
+          shoulder_width: m.shoulderWidthCm,
+        }),
+      });
+
+      if (signupRes.ok) {
+        const signupData = (await signupRes.json()) as { id: string; email: string };
+        const newUser: UserWithMeasurements = {
+          id: signupData.id,
+          authId: signupData.id,
+          email: signupData.email,
+          height: m.heightCm,
+          chest: m.chestCm,
+          waist: m.waistCm,
+          hips: m.hipsCm,
+          inseam: m.inseamCm,
+          shoulder_width: m.shoulderWidthCm,
+          avatar_url: null,
+          face_texture_url: null,
+          created_at: new Date().toISOString(),
+        };
+        setCurrentUser(newUser);
+      }
+      // Non-fatal if signup fails (demo mode) — continue to avatar generation
+
+      // ── 2. Queue avatar generation ─────────────────────────────────────
       const base64 = await fileToBase64(capturedFile);
 
       const res = await fetch('/api/avatar/generate', {
@@ -91,7 +169,7 @@ export default function OnboardingPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [capturedFile, userId]);
+  }, [capturedFile, userId, setCurrentUser]);
 
   const currentStepIndex = STEPS.findIndex((s) => s.id === step);
 
@@ -152,14 +230,21 @@ export default function OnboardingPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <FaceCapture onCapture={handlePhotoCapture} onClear={() => setCapturedFile(null)} />
+                <FaceCapture
+                  onCapture={handlePhotoCapture}
+                  onClear={() => { setCapturedFile(null); setPhotoError(null); }}
+                  isLoading={photoUploading}
+                />
+                {photoError && (
+                  <p className="text-orange-400 text-xs text-center">{photoError}</p>
+                )}
                 <button
                   id="onboarding-photo-next"
-                  disabled={!capturedFile}
+                  disabled={!capturedFile || photoUploading}
                   onClick={() => setStep('measurements')}
                   className="w-full py-4 rounded-2xl font-semibold bg-[#bef264] text-black hover:bg-[#a3e635] disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
-                  Continue
+                  {photoUploading ? 'Uploading…' : 'Continue'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
